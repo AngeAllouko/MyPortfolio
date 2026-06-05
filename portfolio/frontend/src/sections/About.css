@@ -1,0 +1,110 @@
+.about {
+  padding: 120px 0;
+  border-top: 1px solid var(--border);
+}
+
+.about .section-header {
+  text-align: center;
+  margin-bottom: 64px;
+}
+
+.about-approach {
+  margin-bottom: 64px;
+}
+
+.approach-label {
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.approach-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.approach-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: var(--transition);
+}
+
+.approach-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.approach-num {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-dim);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.approach-text {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-weight: 400;
+}
+
+.about-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.stat-item {
+  background: var(--bg-card);
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transition: var(--transition);
+}
+
+.stat-item:hover {
+  background: var(--bg-card-hover);
+}
+
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .approach-cards { grid-template-columns: 1fr; }
+  .about-stats { grid-template-columns: 1fr; }
+  .about { padding: 80px 0; }
+}

@@ -1,0 +1,26 @@
+:root {
+  --bg-color: #0a0a0a;
+  --card-bg: #111111;
+  --text-primary: #ffffff;
+  --text-secondary: #aaaaaa;
+  --accent: #00ff9d;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.glass {
+  background: rgba(17, 17, 17, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
