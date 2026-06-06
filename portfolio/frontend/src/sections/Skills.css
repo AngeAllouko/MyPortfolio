@@ -37,31 +37,59 @@
   border-bottom: 1px solid var(--border);
 }
 
-.skill-tags {
+/* ── Barres de progression ── */
+.skill-bars {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-direction: column;
+  gap: 14px;
 }
 
-.skill-pill {
-  padding: 6px 14px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 100px;
-  font-size: 0.8rem;
+.skill-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skill-bar-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.skill-bar-name {
+  font-size: 0.82rem;
   color: var(--text-secondary);
-  transition: var(--transition);
-  cursor: default;
+  font-weight: 400;
 }
 
-.skill-card:hover .skill-pill {
-  border-color: var(--accent-dim);
-}
-
-.skill-pill:hover {
-  background: var(--accent-dim);
+.skill-bar-pct {
+  font-size: 0.75rem;
   color: var(--accent);
-  border-color: var(--accent);
+  font-weight: 600;
+  font-family: var(--font-display);
+}
+
+.skill-bar-track {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.skill-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 100px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover — la barre s'illumine */
+.skill-card:hover .skill-bar-fill {
+  box-shadow: 0 0 8px var(--accent-glow, rgba(232,255,71,0.4));
+}
+
+.skill-card:hover .skill-bar-name {
+  color: var(--text-primary);
 }
 
 @media (max-width: 1024px) {
