@@ -3,11 +3,14 @@ import { Trash2, MessageSquare, Mail, Clock, ChevronDown } from "lucide-react";
 import api from "../api/axios";
 import Toast from "../components/Toast";
 
+// ✅ Aligné sur la BD : subject inclus
 interface Contact {
   id: number;
   name: string;
   email: string;
+  subject: string;
   message: string;
+  is_read: boolean;
   created_at: string;
 }
 
@@ -87,21 +90,13 @@ export default function ContactsPage() {
           <div className="empty-state-icon">
             <MessageSquare size={40} />
           </div>
-          <p>Aucun message reçu pour le moment.</p>
+          <p>Aucun message reçu.</p>
         </div>
       ) : (
         <div className="card list">
           {items.map((c) => (
-            <div
-              key={c.id}
-              className="contact-card list-item"
-              style={{
-                flexDirection: "column",
-                padding: 0,
-                alignItems: "stretch",
-              }}
-            >
-              {/* Header cliquable */}
+            <div key={c.id} style={{ borderBottom: "1px solid var(--border)" }}>
+              {/* Header */}
               <div
                 className="contact-header"
                 onClick={() => setExpanded(expanded === c.id ? null : c.id)}
@@ -113,11 +108,31 @@ export default function ContactsPage() {
                   <MessageSquare size={16} color="var(--pink)" />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <p className="item-title" style={{ marginBottom: 2 }}>
-                    {c.name}
-                  </p>
                   <div
-                    style={{ display: "flex", alignItems: "center", gap: 6 }}
+                    style={{ display: "flex", alignItems: "center", gap: 8 }}
+                  >
+                    <p className="item-title" style={{ marginBottom: 0 }}>
+                      {c.name}
+                    </p>
+                    {!c.is_read && (
+                      <span
+                        style={{
+                          width: 6,
+                          height: 6,
+                          borderRadius: "50%",
+                          background: "var(--accent)",
+                          flexShrink: 0,
+                        }}
+                      />
+                    )}
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                      marginTop: 2,
+                    }}
                   >
                     <Mail size={12} color="var(--text-muted)" />
                     <span
@@ -129,8 +144,23 @@ export default function ContactsPage() {
                       {c.email}
                     </span>
                   </div>
+                  {/* Sujet visible en aperçu */}
+                  {expanded !== c.id && c.subject && (
+                    <p
+                      style={{
+                        fontSize: "0.78rem",
+                        color: "var(--text-muted)",
+                        marginTop: 3,
+                      }}
+                    >
+                      <strong style={{ color: "var(--text-secondary)" }}>
+                        Sujet :
+                      </strong>{" "}
+                      {c.subject}
+                    </p>
+                  )}
                   {expanded !== c.id && (
-                    <p className="item-desc" style={{ marginTop: 4 }}>
+                    <p className="item-desc" style={{ marginTop: 3 }}>
                       {c.message}
                     </p>
                   )}
@@ -159,15 +189,28 @@ export default function ContactsPage() {
                 </div>
               </div>
 
-              {/* Body expandable */}
+              {/* Corps expandable */}
               {expanded === c.id && (
                 <div className="contact-body">
+                  {c.subject && (
+                    <p
+                      style={{
+                        fontSize: "0.8rem",
+                        color: "var(--text-secondary)",
+                        marginBottom: 10,
+                      }}
+                    >
+                      <strong>Objet :</strong> {c.subject}
+                    </p>
+                  )}
                   <div className="contact-message-box">{c.message}</div>
                   <div
                     style={{
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
+                      flexWrap: "wrap",
+                      gap: 8,
                     }}
                   >
                     <div
@@ -184,7 +227,7 @@ export default function ContactsPage() {
                     </div>
                     <a
                       className="contact-reply-link"
-                      href={`mailto:${c.email}?subject=Re: Portfolio`}
+                      href={`mailto:${c.email}?subject=Re: ${c.subject}`}
                     >
                       <Mail size={13} /> Répondre à {c.email}
                     </a>

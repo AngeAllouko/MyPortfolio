@@ -11,27 +11,24 @@ import api from "../api/axios";
 import Modal from "../components/Modal";
 import Toast from "../components/Toast";
 
+// ✅ Aligné sur la BD : github_link, live_link, technologies (json), featured
 interface Project {
   id?: number;
   title: string;
   description: string;
-  category: string;
-  tags: string;
+  technologies: string; // saisie CSV → envoyé comme tableau
   image_url: string;
-  live_url: string;
-  github_url: string;
-  accent_color: string;
+  github_link: string; // ✅ BD : github_link
+  live_link: string; // ✅ BD : live_link
   featured: boolean;
 }
 const empty: Project = {
   title: "",
   description: "",
-  category: "",
-  tags: "",
+  technologies: "",
   image_url: "",
-  live_url: "",
-  github_url: "",
-  accent_color: "#e8ff47",
+  github_link: "",
+  live_link: "",
   featured: false,
 };
 
@@ -58,7 +55,10 @@ export default function ProjectsPage() {
   const openEdit = (p: Project) => {
     setEditing({
       ...p,
-      tags: Array.isArray(p.tags) ? p.tags.join(", ") : p.tags || "",
+      // technologies peut être un tableau JSON depuis Laravel
+      technologies: Array.isArray(p.technologies)
+        ? p.technologies.join(", ")
+        : p.technologies || "",
     });
     setModal(true);
   };
@@ -67,8 +67,9 @@ export default function ProjectsPage() {
     setSaving(true);
     const payload = {
       ...editing,
-      tags: editing.tags
-        ? editing.tags
+      // Convertir CSV → tableau pour la colonne JSON de la BD
+      technologies: editing.technologies
+        ? editing.technologies
             .split(",")
             .map((t) => t.trim())
             .filter(Boolean)
@@ -139,7 +140,7 @@ export default function ProjectsPage() {
           <div className="empty-state-icon">
             <FolderOpen size={40} />
           </div>
-          <p>Aucun projet. Ajoutes-en un !</p>
+          <p>Aucun projet.</p>
         </div>
       ) : (
         <div className="projects-grid">
@@ -148,7 +149,8 @@ export default function ProjectsPage() {
               <div
                 className="project-preview"
                 style={{
-                  background: `linear-gradient(135deg, ${p.accent_color}18, var(--bg-card))`,
+                  background:
+                    "linear-gradient(135deg, rgba(232,255,71,0.08), var(--bg-card))",
                 }}
               >
                 {p.image_url ? (
@@ -156,8 +158,8 @@ export default function ProjectsPage() {
                 ) : (
                   <FolderOpen
                     size={30}
-                    color={p.accent_color}
-                    style={{ opacity: 0.35 }}
+                    color="#e8ff47"
+                    style={{ opacity: 0.3 }}
                   />
                 )}
                 {p.featured && (
@@ -179,11 +181,10 @@ export default function ProjectsPage() {
               </div>
               <div className="project-info">
                 <p className="project-card-title">{p.title}</p>
-                <p className="project-card-cat">{p.category}</p>
                 <p className="project-card-desc">{p.description}</p>
-                {Array.isArray(p.tags) && p.tags.length > 0 && (
+                {Array.isArray(p.technologies) && p.technologies.length > 0 && (
                   <div className="tags" style={{ marginBottom: 8 }}>
-                    {p.tags.map((t) => (
+                    {p.technologies.map((t) => (
                       <span className="tag" key={t}>
                         {t}
                       </span>
@@ -191,13 +192,13 @@ export default function ProjectsPage() {
                   </div>
                 )}
                 <div className="project-card-links">
-                  {p.live_url && (
-                    <a href={p.live_url} target="_blank" rel="noreferrer">
+                  {p.live_link && (
+                    <a href={p.live_link} target="_blank" rel="noreferrer">
                       <ExternalLink size={12} /> Live
                     </a>
                   )}
-                  {p.github_url && (
-                    <a href={p.github_url} target="_blank" rel="noreferrer">
+                  {p.github_link && (
+                    <a href={p.github_link} target="_blank" rel="noreferrer">
                       <Link size={12} /> GitHub
                     </a>
                   )}
@@ -218,17 +219,8 @@ export default function ProjectsPage() {
             <input
               className="form-input"
               value={editing.title}
-              placeholder="Mon projet"
+              placeholder="Portfolio Personnel"
               onChange={(e) => set("title", e.target.value)}
-            />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Catégorie</label>
-            <input
-              className="form-input"
-              value={editing.category}
-              placeholder="UI/UX · Frontend"
-              onChange={(e) => set("category", e.target.value)}
             />
           </div>
           <div className="form-group">
@@ -237,17 +229,19 @@ export default function ProjectsPage() {
               className="form-textarea"
               rows={3}
               value={editing.description}
-              placeholder="Description..."
+              placeholder="Description du projet..."
               onChange={(e) => set("description", e.target.value)}
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Tags (séparés par virgule)</label>
+            <label className="form-label">
+              Technologies (séparées par virgule)
+            </label>
             <input
               className="form-input"
-              value={editing.tags}
-              placeholder="React, Figma..."
-              onChange={(e) => set("tags", e.target.value)}
+              value={editing.technologies}
+              placeholder="React, Laravel, MySQL"
+              onChange={(e) => set("technologies", e.target.value)}
             />
           </div>
           <div className="form-group">
@@ -264,31 +258,19 @@ export default function ProjectsPage() {
               <label className="form-label">URL Live</label>
               <input
                 className="form-input"
-                value={editing.live_url}
+                value={editing.live_link}
                 placeholder="https://..."
-                onChange={(e) => set("live_url", e.target.value)}
+                onChange={(e) => set("live_link", e.target.value)}
               />
             </div>
             <div className="form-group">
               <label className="form-label">GitHub URL</label>
               <input
                 className="form-input"
-                value={editing.github_url}
+                value={editing.github_link}
                 placeholder="https://github.com/..."
-                onChange={(e) => set("github_url", e.target.value)}
+                onChange={(e) => set("github_link", e.target.value)}
               />
-            </div>
-          </div>
-          <div className="form-group">
-            <label className="form-label">Couleur accent</label>
-            <div className="color-input-wrap">
-              <input
-                type="color"
-                className="form-color"
-                value={editing.accent_color}
-                onChange={(e) => set("accent_color", e.target.value)}
-              />
-              <span className="color-value">{editing.accent_color}</span>
             </div>
           </div>
           <label className="form-checkbox-label">
@@ -296,7 +278,7 @@ export default function ProjectsPage() {
               type="checkbox"
               checked={editing.featured}
               onChange={(e) => set("featured", e.target.checked)}
-            />{" "}
+            />
             Projet mis en avant
           </label>
           <div className="modal-footer">

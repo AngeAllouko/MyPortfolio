@@ -1,49 +1,49 @@
+import { useEffect, useState } from "react";
+import api from "../api/axios";
 import "./Skills.css";
 
-const skillGroups = [
-  {
-    category: "Core Skills",
-    skills: [
-      "UI/UX layout",
-      "Frontend Dev",
-      "Responsive Web Design",
-      "Component-based Design",
-    ],
-  },
-  {
-    category: "Frontend Tech",
-    skills: ["HTML", "CSS", "JS", "TypeScript", "React", "WordPress"],
-  },
-  {
-    category: "Design Tools",
-    skills: ["Figma", "Photoshop", "Illustrator"],
-  },
-  {
-    category: "Tools & Interaction",
-    skills: ["GitHub", "Netlify", "GSAP", "UI Interactions"],
-  },
-];
+interface Skill {
+  id: number;
+  name: string;
+  category: string;
+  level: number;
+}
 
 export default function Skills() {
+  const [skills, setSkills] = useState<Skill[]>([]);
+
+  useEffect(() => {
+    api
+      .get("/skills")
+      .then((r) => setSkills(r.data))
+      .catch(() => {});
+  }, []);
+
+  const grouped = skills.reduce<Record<string, Skill[]>>((acc, s) => {
+    if (!acc[s.category]) acc[s.category] = [];
+    acc[s.category].push(s);
+    return acc;
+  }, {});
+
   return (
     <section id="skills" className="skills">
       <div className="container">
         <div className="section-header">
-          <span className="section-tag">What I know</span>
+          <span className="section-tag">Qu'est ce que je connais</span>
           <h2 className="section-title">Skills</h2>
           <p className="section-subtitle">
-            Crafting seamless UI/UX and clean code
+            Création de design attrayant et de code propre
           </p>
         </div>
 
         <div className="skills-grid">
-          {skillGroups.map((group, i) => (
-            <div className="skill-card" key={i}>
-              <h3 className="skill-category">{group.category}</h3>
+          {Object.entries(grouped).map(([category, items]) => (
+            <div className="skill-card" key={category}>
+              <h3 className="skill-category">{category}</h3>
               <div className="skill-tags">
-                {group.skills.map((skill, j) => (
-                  <span className="skill-pill" key={j}>
-                    {skill}
+                {items.map((s) => (
+                  <span className="skill-pill" key={s.id}>
+                    {s.name}
                   </span>
                 ))}
               </div>

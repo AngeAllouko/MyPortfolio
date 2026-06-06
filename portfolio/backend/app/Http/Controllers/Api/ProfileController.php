@@ -1,33 +1,80 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Profile;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
-    public function index()
-    {
-        return Profile::firstOrFail();
-    }
-
     public function show()
     {
-        return Profile::firstOrFail();
+        return response()->json(Profile::first());
     }
 
     public function store(Request $request)
     {
-        $profile = Profile::create($request->all());
+        $existing = Profile::first();
+        if ($existing) {
+            return $this->update($request, $existing->id);
+        }
+        $data    = $this->handleUploads($request, null);
+        $profile = Profile::create($data);
         return response()->json($profile, 201);
     }
 
     public function update(Request $request, $id)
     {
-        $profile = Profile::findOrFail($id);
-        $profile->update($request->all());
-        return response()->json($profile);
+        $profile = Profile::first();
+        if (!$profile) {
+            return response()->json(['message' => 'Profil introuvable'], 404);
+        }
+        $data = $this->handleUploads($request, $profile);
+        $profile->update($data);
+        return response()->json($profile->fresh());
+    }
+
+    private function handleUploads(Request $request, ?Profile $existing): array
+    {
+        $data = $request->except(['photo_file', 'cv_file', '_method']);
+
+        // ✅ Fix Windows/MINGW : utiliser allFiles() au lieu de hasFile()
+        $files = $request->allFiles();
+
+        // ── Photo ──
+        if (isset($files['photo_file'])) {
+            $file = $files['photo_file'];
+
+            if ($file->isValid()) {
+                // Supprimer l'ancienne photo
+                if ($existing?->photo_url) {
+                    Storage::disk('public')->delete(
+                        str_replace('/storage/', '', $existing->photo_url)
+                    );
+                }
+                $filename = 'photo_' . time() . '.' . $file->getClientOriginalExtension();
+                $path     = $file->storeAs('uploads/photos', $filename, 'public');
+                $data['photo_url'] = '/storage/' . $path;
+            }
+        }
+
+        // ── CV ──
+        if (isset($files['cv_file'])) {
+            $file = $files['cv_file'];
+
+            if ($file->isValid()) {
+                if ($existing?->cv_url) {
+                    Storage::disk('public')->delete(
+                        str_replace('/storage/', '', $existing->cv_url)
+                    );
+                }
+                $filename = 'cv_' . time() . '.' . $file->getClientOriginalExtension();
+                $path     = $file->storeAs('uploads/cvs', $filename, 'public');
+                $data['cv_url'] = '/storage/' . $path;
+            }
+        }
+
+        return $data;
     }
 }

@@ -6,11 +6,11 @@ interface HeaderProps {
 }
 
 const navLinks = [
-  { id: "home", label: "Home" },
+  { id: "home", label: "Accueil" },
   { id: "services", label: "Services" },
-  { id: "about", label: "About" },
-  { id: "skills", label: "Skills" },
-  { id: "projects", label: "Projects" },
+  { id: "about", label: "À propos" },
+  { id: "skills", label: "Compétences" },
+  { id: "projects", label: "Projets" },
 ];
 
 export default function Header({ activeSection }: HeaderProps) {
@@ -48,7 +48,7 @@ export default function Header({ activeSection }: HeaderProps) {
         </nav>
 
         <button className="cta-btn" onClick={() => scrollTo("contact")}>
-          Let's Talk
+          Me contacter
         </button>
 
         <button className="burger" onClick={() => setMenuOpen(!menuOpen)}>

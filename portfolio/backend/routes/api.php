@@ -11,6 +11,12 @@ use App\Http\Controllers\Api\ContactController;
 
 Route::group([], function () {
 
+    Route::get('profile',         [ProfileController::class, 'show']);
+    Route::post('profile',        [ProfileController::class, 'store']);
+    Route::post('profile/{id}',   [ProfileController::class, 'update']); // ← POST avec _method=PUT
+    Route::put('profile/{id}',    [ProfileController::class, 'update']); // ← garde aussi PUT classique
+
+
     // Profile (généralement une seule entrée)
     Route::apiResource('profile', ProfileController::class)->except(['destroy']);
     Route::get('profile', [ProfileController::class, 'show']);

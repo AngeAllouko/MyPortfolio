@@ -1,54 +1,52 @@
+import { useEffect, useState } from "react";
+import api from "../api/axios";
 import "./Services.css";
 
-const services = [
-  {
-    icon: "✦",
-    title: "UI/UX Website Design",
-    desc: "Clean, user-focused layouts with clear structure, smooth navigation, and strong visual hierarchy.",
-    tags: ["Modern layouts", "Responsive design"],
-  },
-  {
-    icon: "⟨/⟩",
-    title: "Frontend Development",
-    desc: "Responsive interfaces using HTML, CSS, and JavaScript for clean, consistent, reliable performance.",
-    tags: ["Clean HTML/CSS", "Smooth interactions"],
-  },
-  {
-    icon: "⚡",
-    title: "Performance & Responsiveness",
-    desc: "Fast, mobile-first websites optimized for speed, accessibility, and dependable performance.",
-    tags: ["Speed optimization", "Asset efficiency"],
-  },
-  {
-    icon: "⊞",
-    title: "WordPress Implementation",
-    desc: "Lightweight WordPress setups with easy updates, fast loading, and scalable, clean, customizable layouts.",
-    tags: ["Theme setup", "Easy management"],
-  },
-];
+interface Skill {
+  id: number;
+  name: string;
+  category: string;
+  level: number;
+}
+
+const ICONS: string[] = ["✦", "⟨/⟩", "⚡", "⊞", "◈", "⟳"];
 
 export default function Services() {
+  const [skills, setSkills] = useState<Skill[]>([]);
+
+  useEffect(() => {
+    api
+      .get("/skills")
+      .then((r) => setSkills(r.data))
+      .catch(() => {});
+  }, []);
+
+  const grouped = skills.reduce<Record<string, Skill[]>>((acc, s) => {
+    if (!acc[s.category]) acc[s.category] = [];
+    acc[s.category].push(s);
+    return acc;
+  }, {});
+
   return (
     <section id="services" className="services">
       <div className="container">
         <div className="section-header">
-          <span className="section-tag">What I offer</span>
+          <span className="section-tag">Ce que je propose</span>
           <h2 className="section-title">Services</h2>
           <p className="section-subtitle">
-            Designing clean scalable responsive websites
+            Concevoir des sites Web réactifs, propres et évolutifs
           </p>
         </div>
 
         <div className="services-grid">
-          {services.map((s, i) => (
-            <div className="service-card" key={i}>
-              <div className="service-icon">{s.icon}</div>
-              <h3 className="service-title">{s.title}</h3>
-              <p className="service-desc">{s.desc}</p>
+          {Object.entries(grouped).map(([category, items], i) => (
+            <div className="service-card" key={category}>
+              <div className="service-icon">{ICONS[i % ICONS.length]}</div>
+              <h3 className="service-title">{category}</h3>
               <div className="service-tags">
-                {s.tags.map((tag, j) => (
-                  <span className="service-tag" key={j}>
-                    {tag}
+                {items.map((s) => (
+                  <span className="service-tag" key={s.id}>
+                    {s.name}
                   </span>
                 ))}
               </div>

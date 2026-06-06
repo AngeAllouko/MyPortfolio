@@ -59,7 +59,7 @@
 .hero-title {
   font-family: var(--font-display);
   font-size: clamp(3rem, 6vw, 5.5rem);
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.0;
   color: var(--text-primary);
   margin-bottom: 24px;
@@ -222,3 +222,9 @@
   .hero-actions { display: flex; justify-content: center; }
   .hero-socials { justify-content: center; }
 }
+/* Loading dots */
+.hero-loading { display: flex; gap: 8px; align-items: center; }
+.hero-loading span { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: heroDot 1.2s ease-in-out infinite; }
+.hero-loading span:nth-child(2) { animation-delay: 0.2s; }
+.hero-loading span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes heroDot { 0%,80%,100% { transform: scale(0.5); opacity: 0.3; } 40% { transform: scale(1); opacity: 1; } }

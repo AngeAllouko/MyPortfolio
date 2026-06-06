@@ -11,6 +11,7 @@ export interface Profile {
   linkedin_url?: string;
   github_url?: string;
   photo_url?: string;
+  cv_url?: string;
   social_links?: Record<string, string>;
   created_at?: string;
   updated_at?: string;

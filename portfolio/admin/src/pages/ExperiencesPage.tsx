@@ -4,26 +4,23 @@ import api from "../api/axios";
 import Modal from "../components/Modal";
 import Toast from "../components/Toast";
 
+// ✅ Aligné sur la BD : job_title (pas "position"), company, start_date, end_date, description, location
 interface Experience {
   id?: number;
-  position: string;
+  job_title: string;
   company: string;
   location: string;
   start_date: string;
   end_date: string;
-  is_current: boolean;
   description: string;
-  tags: string;
 }
 const empty: Experience = {
-  position: "",
+  job_title: "",
   company: "",
   location: "",
   start_date: "",
   end_date: "",
-  is_current: false,
   description: "",
-  tags: "",
 };
 
 const fmt = (d: string) =>
@@ -54,29 +51,12 @@ export default function ExperiencesPage() {
     load();
   }, []);
 
-  const openEdit = (e: Experience) => {
-    setEditing({
-      ...e,
-      tags: Array.isArray(e.tags) ? e.tags.join(", ") : e.tags || "",
-    });
-    setModal(true);
-  };
-
   const handleSave = async () => {
     setSaving(true);
-    const payload = {
-      ...editing,
-      tags: editing.tags
-        ? editing.tags
-            .split(",")
-            .map((t) => t.trim())
-            .filter(Boolean)
-        : [],
-    };
     try {
       editing.id
-        ? await api.put(`/experiences/${editing.id}`, payload)
-        : await api.post("/experiences", payload);
+        ? await api.put(`/experiences/${editing.id}`, editing)
+        : await api.post("/experiences", editing);
       setModal(false);
       load();
       setToast({ msg: "Expérience sauvegardée ✓", type: "success" });
@@ -98,7 +78,7 @@ export default function ExperiencesPage() {
     }
   };
 
-  const set = (k: keyof Experience, v: string | boolean) =>
+  const set = (k: keyof Experience, v: string) =>
     setEditing((e) => ({ ...e, [k]: v }));
 
   return (
@@ -138,7 +118,7 @@ export default function ExperiencesPage() {
           <div className="empty-state-icon">
             <Briefcase size={40} />
           </div>
-          <p>Aucune expérience. Ajoutes-en une !</p>
+          <p>Aucune expérience.</p>
         </div>
       ) : (
         <div className="card list">
@@ -152,31 +132,28 @@ export default function ExperiencesPage() {
                   <Briefcase size={17} color="var(--blue)" />
                 </div>
                 <div className="item-body">
-                  <p className="item-title">{exp.position}</p>
+                  <p className="item-title">{exp.job_title}</p>
                   <p className="item-subtitle">
                     {exp.company}
                     {exp.location ? ` · ${exp.location}` : ""}
                   </p>
                   <p className="item-meta">
                     {fmt(exp.start_date)} —{" "}
-                    {exp.is_current ? "Présent" : fmt(exp.end_date)}
+                    {exp.end_date ? fmt(exp.end_date) : "Présent"}
                   </p>
                   {exp.description && (
                     <p className="item-desc">{exp.description}</p>
                   )}
-                  {Array.isArray(exp.tags) && exp.tags.length > 0 && (
-                    <div className="tags">
-                      {exp.tags.map((t) => (
-                        <span className="tag" key={t}>
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
               <div className="item-actions">
-                <button className="btn-icon" onClick={() => openEdit(exp)}>
+                <button
+                  className="btn-icon"
+                  onClick={() => {
+                    setEditing(exp);
+                    setModal(true);
+                  }}
+                >
                   <Pencil size={14} />
                 </button>
                 <button
@@ -197,12 +174,12 @@ export default function ExperiencesPage() {
           onClose={() => setModal(false)}
         >
           <div className="form-group">
-            <label className="form-label">Poste</label>
+            <label className="form-label">Intitulé du poste</label>
             <input
               className="form-input"
-              value={editing.position}
-              placeholder="Frontend Developer"
-              onChange={(e) => set("position", e.target.value)}
+              value={editing.job_title}
+              placeholder="Développeur Full Stack"
+              onChange={(e) => set("job_title", e.target.value)}
             />
           </div>
           <div className="form-group">
@@ -210,7 +187,7 @@ export default function ExperiencesPage() {
             <input
               className="form-input"
               value={editing.company}
-              placeholder="Acme Corp"
+              placeholder="MIAGE, Acme Corp..."
               onChange={(e) => set("company", e.target.value)}
             />
           </div>
@@ -234,32 +211,14 @@ export default function ExperiencesPage() {
               />
             </div>
             <div className="form-group">
-              <label className="form-label">Date fin</label>
+              <label className="form-label">Date fin (vide = Présent)</label>
               <input
                 className="form-input"
                 type="date"
                 value={editing.end_date}
-                disabled={editing.is_current}
                 onChange={(e) => set("end_date", e.target.value)}
               />
             </div>
-          </div>
-          <label className="form-checkbox-label">
-            <input
-              type="checkbox"
-              checked={editing.is_current}
-              onChange={(e) => set("is_current", e.target.checked)}
-            />{" "}
-            Poste actuel
-          </label>
-          <div className="form-group">
-            <label className="form-label">Tags (séparés par virgule)</label>
-            <input
-              className="form-input"
-              value={editing.tags}
-              placeholder="React, CSS, Figma"
-              onChange={(e) => set("tags", e.target.value)}
-            />
           </div>
           <div className="form-group">
             <label className="form-label">Description</label>
@@ -267,7 +226,7 @@ export default function ExperiencesPage() {
               className="form-textarea"
               rows={3}
               value={editing.description}
-              placeholder="Description..."
+              placeholder="Description du poste..."
               onChange={(e) => set("description", e.target.value)}
             />
           </div>

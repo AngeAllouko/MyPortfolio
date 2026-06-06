@@ -4,21 +4,18 @@ import api from "../api/axios";
 import Modal from "../components/Modal";
 import Toast from "../components/Toast";
 
+// ✅ Aligné sur la BD : title, institution, year, description
 interface Diploma {
   id?: number;
-  degree: string;
-  school: string;
-  field: string;
-  start_year: number;
-  end_year: number | "";
+  title: string;
+  institution: string;
+  year: string;
   description: string;
 }
 const empty: Diploma = {
-  degree: "",
-  school: "",
-  field: "",
-  start_year: new Date().getFullYear(),
-  end_year: "",
+  title: "",
+  institution: "",
+  year: String(new Date().getFullYear()),
   description: "",
 };
 
@@ -72,7 +69,7 @@ export default function DiplomasPage() {
     }
   };
 
-  const set = (k: keyof Diploma, v: string | number) =>
+  const set = (k: keyof Diploma, v: string) =>
     setEditing((e) => ({ ...e, [k]: v }));
 
   return (
@@ -112,7 +109,7 @@ export default function DiplomasPage() {
           <div className="empty-state-icon">
             <Award size={40} />
           </div>
-          <p>Aucun diplôme. Commence par en ajouter un !</p>
+          <p>Aucun diplôme.</p>
         </div>
       ) : (
         <div className="card list">
@@ -126,21 +123,9 @@ export default function DiplomasPage() {
                   <Award size={17} color="var(--yellow)" />
                 </div>
                 <div className="item-body">
-                  <p className="item-title">
-                    {d.degree}{" "}
-                    <span
-                      style={{
-                        color: "var(--text-secondary)",
-                        fontWeight: 400,
-                      }}
-                    >
-                      — {d.field}
-                    </span>
-                  </p>
-                  <p className="item-subtitle">{d.school}</p>
-                  <p className="item-meta">
-                    {d.start_year} — {d.end_year || "Présent"}
-                  </p>
+                  <p className="item-title">{d.title}</p>
+                  <p className="item-subtitle">{d.institution}</p>
+                  <p className="item-meta">{d.year}</p>
                   {d.description && (
                     <p className="item-desc">{d.description}</p>
                   )}
@@ -174,54 +159,31 @@ export default function DiplomasPage() {
           onClose={() => setModal(false)}
         >
           <div className="form-group">
-            <label className="form-label">Diplôme</label>
+            <label className="form-label">Titre du diplôme</label>
             <input
               className="form-input"
-              value={editing.degree}
-              placeholder="Master, Licence..."
-              onChange={(e) => set("degree", e.target.value)}
+              value={editing.title}
+              placeholder="Master MIAGE, Licence..."
+              onChange={(e) => set("title", e.target.value)}
             />
           </div>
           <div className="form-group">
             <label className="form-label">Établissement</label>
             <input
               className="form-input"
-              value={editing.school}
-              placeholder="Université de..."
-              onChange={(e) => set("school", e.target.value)}
+              value={editing.institution}
+              placeholder="Université Felix Houphouët-Boigny..."
+              onChange={(e) => set("institution", e.target.value)}
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Domaine</label>
+            <label className="form-label">Année</label>
             <input
               className="form-input"
-              value={editing.field}
-              placeholder="Informatique, Design..."
-              onChange={(e) => set("field", e.target.value)}
+              value={editing.year}
+              placeholder="2026"
+              onChange={(e) => set("year", e.target.value)}
             />
-          </div>
-          <div className="form-grid-2">
-            <div className="form-group">
-              <label className="form-label">Année début</label>
-              <input
-                className="form-input"
-                type="number"
-                value={editing.start_year}
-                onChange={(e) => set("start_year", Number(e.target.value))}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Année fin</label>
-              <input
-                className="form-input"
-                type="number"
-                value={editing.end_year}
-                placeholder="Vide = Présent"
-                onChange={(e) =>
-                  set("end_year", e.target.value ? Number(e.target.value) : "")
-                }
-              />
-            </div>
           </div>
           <div className="form-group">
             <label className="form-label">Description</label>
@@ -229,7 +191,7 @@ export default function DiplomasPage() {
               className="form-textarea"
               rows={3}
               value={editing.description}
-              placeholder="Optionnelle..."
+              placeholder="Description optionnelle..."
               onChange={(e) => set("description", e.target.value)}
             />
           </div>

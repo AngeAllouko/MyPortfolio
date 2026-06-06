@@ -1,55 +1,147 @@
+import { useEffect, useState } from "react";
+import api from "../api/axios";
 import "./About.css";
 
-const approach = [
-  { num: "01", label: "Understand users & goals" },
-  { num: "02", label: "Create clean UI layouts" },
-  { num: "03", label: "Responsive experiences" },
-];
+interface Profile {
+  bio?: string;
+}
+interface Experience {
+  id: number;
+  job_title: string;
+  company: string;
+  start_date: string;
+  end_date?: string;
+  location?: string;
+  description: string;
+}
+interface Diploma {
+  id: number;
+  title: string;
+  institution: string;
+  year: string;
+  description?: string;
+}
 
-const stats = [
-  { value: "02+", label: "Years Of Experience" },
-  { value: "15+", label: "Projects Completed" },
-  { value: "05+", label: "Clients Served" },
-];
+const fmt = (d: string) =>
+  new Date(d).toLocaleDateString("fr-FR", { month: "short", year: "numeric" });
 
 export default function About() {
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [experiences, setExp] = useState<Experience[]>([]);
+  const [diplomas, setDiplomas] = useState<Diploma[]>([]);
+
+  useEffect(() => {
+    Promise.allSettled([
+      api.get("/profile"),
+      api.get("/experiences"),
+      api.get("/diplomas"),
+    ]).then(([p, e, d]) => {
+      if (p.status === "fulfilled") {
+        const v = p.value.data;
+        setProfile(Array.isArray(v) ? v[0] : v);
+      }
+      if (e.status === "fulfilled") setExp(e.value.data);
+      if (d.status === "fulfilled") setDiplomas(d.value.data);
+    });
+  }, []);
+
+  const currentYear = new Date().getFullYear();
+  const firstYear = experiences.length
+    ? Math.min(...experiences.map((e) => new Date(e.start_date).getFullYear()))
+    : currentYear;
+  const yearsExp = currentYear - firstYear;
+
   return (
     <section id="about" className="about">
       <div className="container">
         <div className="section-header">
-          <span className="section-tag">Who I am</span>
-          <h2 className="section-title">About Me</h2>
+          <span className="section-tag">Qui suis-je ?</span>
+          <h2 className="section-title">A propos de moi</h2>
           <p
             className="section-subtitle"
             style={{ margin: "12px auto 0", textAlign: "center" }}
           >
-            I'm a front-end developer and designer passionate about crafting
-            clean, intuitive, and responsive digital experiences. I focus on
-            turning ideas into seamless interfaces by understanding user needs,
-            designing thoughtful UI layouts, and ensuring smooth interactions
-            across devices.
+            {profile?.bio ?? ""}
           </p>
         </div>
 
-        <div className="about-approach">
-          <p className="approach-label">My Approach</p>
-          <div className="approach-cards">
-            {approach.map((a) => (
-              <div className="approach-card" key={a.num}>
-                <span className="approach-num">{a.num}</span>
-                <span className="approach-text">{a.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="about-stats">
-          {stats.map((s, i) => (
-            <div className="stat-item" key={i}>
-              <span className="stat-value">{s.value}</span>
-              <span className="stat-label">{s.label}</span>
+        {/* Expériences sous forme de approach-cards */}
+        {experiences.length > 0 && (
+          <div className="about-approach">
+            <p className="approach-label">Expériences</p>
+            <div className="approach-cards">
+              {experiences.map((exp, i) => (
+                <div className="approach-card" key={exp.id}>
+                  <span className="approach-num">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <div>
+                    <span className="approach-text">{exp.job_title}</span>
+                    <p
+                      style={{
+                        fontSize: "0.78rem",
+                        color: "var(--text-muted)",
+                        marginTop: 2,
+                      }}
+                    >
+                      {exp.company} · {fmt(exp.start_date)} —{" "}
+                      {exp.end_date ? fmt(exp.end_date) : "Présent"}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+        )}
+
+        {/* Diplômes */}
+        {diplomas.length > 0 && (
+          <div className="about-approach">
+            <p className="approach-label">Formation</p>
+            <div className="approach-cards">
+              {diplomas.map((d, i) => (
+                <div className="approach-card" key={d.id}>
+                  <span className="approach-num">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <div>
+                    <span className="approach-text">{d.title}</span>
+                    <p
+                      style={{
+                        fontSize: "0.78rem",
+                        color: "var(--text-muted)",
+                        marginTop: 2,
+                      }}
+                    >
+                      {d.institution} · {d.year}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Stats dynamiques — même design qu'avant */}
+        <div className="about-stats">
+          <div className="stat-item">
+            <span className="stat-value">
+              {String(yearsExp).padStart(2, "0")}+
+            </span>
+            <span className="stat-label">Années d'expériences</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-value">
+              {String(experiences.length).padStart(2, "0")}+
+            </span>
+            <span className="stat-label">Expériences</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-value">
+              {String(diplomas.length).padStart(2, "0")}+
+            </span>
+            <span className="stat-label">Diplômes</span>
+          </div>
         </div>
       </div>
     </section>
