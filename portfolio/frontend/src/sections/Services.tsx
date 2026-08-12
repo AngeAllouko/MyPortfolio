@@ -34,7 +34,8 @@ export default function Services() {
           <span className="section-tag">Ce que je propose</span>
           <h2 className="section-title">Services</h2>
           <p className="section-subtitle">
-            Concevoir des sites Web réactifs, propres et évolutifs
+            Concevoir des sites Web réactifs et des applications mobile IOS,
+            propres et évolutifs
           </p>
         </div>
 

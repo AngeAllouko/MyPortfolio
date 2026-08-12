@@ -32,7 +32,7 @@ export default function Header({ activeSection }: HeaderProps) {
     <header className={`header ${scrolled ? "scrolled" : ""}`}>
       <div className="header-inner container">
         <button className="logo" onClick={() => scrollTo("home")}>
-          <span className="logo-mark">vm</span>
+          <span className="logo-mark">AEDAN</span>
         </button>
 
         <nav className={`nav ${menuOpen ? "open" : ""}`}>

@@ -65,7 +65,7 @@ export default function Contact() {
             </h2>
             <p className="contact-desc">
               Vous avez un projet en tete ? Je serai ravi de l'entendre. Envoyez
-              moi un message et créons quelque chose de génial.
+              moi un message et créons quelque chose de génial !
             </p>
             <div className="contact-info">
               {profile?.email && (
