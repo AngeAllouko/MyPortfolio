@@ -1,50 +1,65 @@
-import { useEffect, useState } from "react";
+import { Mail, MapPin, Phone, Send } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { useState, type FormEvent } from "react";
 import api from "../api/axios";
+import { GitHubIcon, LinkedInIcon } from "../components/BrandIcons";
+import BlobScene from "../components/bg/BlobScene";
+import SectionTitle from "../components/SectionTitle";
+import Float3D from "../components/three-d/Float3D";
+import { Keycap } from "../components/three-d/Objects3D";
+import { usePortfolio } from "../data/context";
+import { PALETTE } from "../lib/palette";
 import "./Contact.css";
 
-interface Profile {
-  name?: string;
-  email?: string;
-  location?: string;
-  phone?: string;
-  linkedin_url?: string;
-  github_url?: string;
-}
 type Status = "idle" | "loading" | "success" | "error";
+type Field = "name" | "email" | "subject" | "message";
+type Errors = Partial<Record<Field, string>>;
+
+const isDemo = import.meta.env.MODE === "demo" || import.meta.env.VITE_DEMO === "true";
+const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+
+function validate(form: Record<Field, string>): Errors {
+  const errors: Errors = {};
+  if (!form.name.trim()) errors.name = "Indiquez votre nom.";
+  if (!form.email.trim()) errors.email = "Indiquez votre adresse e-mail.";
+  else if (!emailOk(form.email)) errors.email = "Cette adresse e-mail n'est pas valide.";
+  if (!form.message.trim()) errors.message = "Écrivez votre message.";
+  return errors;
+}
 
 export default function Contact() {
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [form, setForm] = useState({
+  const { profile } = usePortfolio();
+  const [form, setForm] = useState<Record<Field, string>>({
     name: "",
     email: "",
     subject: "",
     message: "",
   });
+  const [errors, setErrors] = useState<Errors>({});
   const [status, setStatus] = useState<Status>("idle");
 
-  useEffect(() => {
-    api
-      .get("/profile")
-      .then((r) => {
-        const d = r.data;
-        setProfile(Array.isArray(d) ? d[0] : d);
-      })
-      .catch(() => {});
-  }, []);
+  const update = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const name = e.target.name as Field;
+    setForm((f) => ({ ...f, [name]: e.target.value }));
+    if (errors[name]) setErrors((er) => ({ ...er, [name]: undefined }));
+  };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
-
-  const handleSubmit = async (e: React.MouseEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.email || !form.message) return;
+    const found = validate(form);
+    setErrors(found);
+    if (Object.keys(found).length) {
+      document.getElementById(`contact-${Object.keys(found)[0]}`)?.focus();
+      return;
+    }
     setStatus("loading");
     try {
-      await api.post("/contacts", {
-        ...form,
-        subject: form.subject || "Message depuis le portfolio",
-      });
+      if (isDemo) await new Promise((r) => setTimeout(r, 900));
+      else
+        await api.post("/contacts", {
+          ...form,
+          subject: form.subject.trim() || "Message depuis le portfolio",
+        });
       setStatus("success");
       setForm({ name: "", email: "", subject: "", message: "" });
     } catch {
@@ -52,169 +67,174 @@ export default function Contact() {
     }
   };
 
+  const fieldProps = (name: Field) => ({
+    id: `contact-${name}`,
+    name,
+    value: form[name],
+    onChange: update,
+    placeholder: " ",
+    "aria-invalid": errors[name] ? true : undefined,
+    "aria-describedby": errors[name] ? `contact-${name}-error` : undefined,
+  });
+
+  const errorFor = (name: Field) =>
+    errors[name] && (
+      <p className="field-error" id={`contact-${name}-error`}>
+        {errors[name]}
+      </p>
+    );
+
   return (
-    <section id="contact" className="contact">
+    <section id="contact" className="section contact has-bg">
+      <BlobScene
+        blobs={[
+          { corner: "bottom-left", radius: 320, color: "#e8c400", fade: PALETTE.yellow, seed: 52 },
+          { corner: "top-right", radius: 200, color: "#f2d000", fade: PALETTE.yellow, steps: 2, seed: 58 },
+        ]}
+      />
       <div className="container">
-        <div className="contact-inner">
+        <div className="contact-grid">
           <div className="contact-left">
-            <span className="section-tag">Contactez nous !</span>
-            <h2 className="section-title">
-              Travaillons
-              <br />
-              ensemble
-            </h2>
-            <p className="contact-desc">
-              Vous avez un projet en tete ? Je serai ravi de l'entendre. Envoyez
-              moi un message et créons quelque chose de génial !
+            <SectionTitle className="contact-title" color="var(--on-yellow)">
+              Travaillons ensemble
+            </SectionTitle>
+            <p className="contact-lead">
+              Vous avez un projet en tête ? Écrivez-moi quelques lignes : je vous réponds dès que
+              possible.
             </p>
-            <div className="contact-info">
+
+            <ul className="contact-info">
               {profile?.email && (
-                <div className="contact-info-item">
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                    <polyline points="22,6 12,13 2,6" />
-                  </svg>
-                  <span>{profile.email}</span>
-                </div>
-              )}
-              {profile?.location && (
-                <div className="contact-info-item">
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
-                  <span>{profile.location}</span>
-                </div>
+                <li>
+                  <Mail size={18} aria-hidden="true" />
+                  <a href={`mailto:${profile.email}`}>{profile.email}</a>
+                </li>
               )}
               {profile?.phone && (
-                <div className="contact-info-item">
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.82 19.79 19.79 0 01.12 1.22 2 2 0 012.1 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.09a16 16 0 006 6l.45-.45a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" />
-                  </svg>
-                  <span>{profile.phone}</span>
-                </div>
+                <li>
+                  <Phone size={18} aria-hidden="true" />
+                  <a href={`tel:${profile.phone.replace(/\s/g, "")}`}>{profile.phone}</a>
+                </li>
               )}
-            </div>
+              {profile?.location && (
+                <li>
+                  <MapPin size={18} aria-hidden="true" />
+                  <span>{profile.location}</span>
+                </li>
+              )}
+            </ul>
+
+            <Float3D className="contact-key" depth={0.6}>
+              <Keycap label="Entrée ↵" wide tone="light" />
+            </Float3D>
           </div>
 
           <div className="contact-form-wrap">
-            {status === "success" ? (
-              <div className="form-success">
-                <span className="success-icon">✓</span>
-                <p>Message envoyé ! Je vous recontacterai bientôt.</p>
-              </div>
-            ) : (
-              <div className="contact-form">
-                {status === "error" && (
-                  <p style={{ color: "var(--accent)", fontSize: "0.85rem" }}>
-                    Une erreur est survenue. Réessaie.
-                  </p>
-                )}
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="name">Votre nom</label>
-                    <input
-                      id="name"
-                      name="name"
-                      type="text"
-                      placeholder="Allouko Daniel"
-                      value={form.name}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="email">Adresse Email</label>
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="aaaa@gmail.com"
-                      value={form.email}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="subject">Objet</label>
-                  <input
-                    id="subject"
-                    name="subject"
-                    type="text"
-                    placeholder="Proposition de projet, question, collaboration etc."
-                    value={form.subject}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="message">Messages</label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    rows={4}
-                    placeholder="Parlez moi de votre projet..."
-                    value={form.message}
-                    onChange={handleChange}
-                  />
-                </div>
-                <button
-                  className="form-submit"
-                  onClick={handleSubmit}
-                  disabled={status === "loading"}
+            <AnimatePresence mode="wait" initial={false}>
+              {status === "success" ? (
+                <motion.div
+                  key="success"
+                  className="form-success"
+                  role="status"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                 >
-                  {status === "loading" ? "Sending..." : "Envoyez un message"}
-                  {status !== "loading" && (
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <line x1="22" y1="2" x2="11" y2="13" />
-                      <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                    </svg>
+                  <svg viewBox="0 0 52 52" className="success-mark" aria-hidden="true">
+                    <motion.circle
+                      cx="26"
+                      cy="26"
+                      r="24"
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ duration: 0.7, ease: "easeInOut" }}
+                    />
+                    <motion.path
+                      d="M15 27l7 7 15-16"
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ delay: 0.5, duration: 0.45, ease: "easeOut" }}
+                    />
+                  </svg>
+                  <p className="form-success-title">Message envoyé.</p>
+                  <p>Merci ! Je vous réponds très vite.</p>
+                  <button className="btn btn-ghost btn-small" onClick={() => setStatus("idle")}>
+                    Écrire un autre message
+                  </button>
+                </motion.div>
+              ) : (
+                <motion.form
+                  key="form"
+                  className="contact-form"
+                  onSubmit={submit}
+                  noValidate
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.35 }}
+                >
+                  <div className="form-row">
+                    <div className="field">
+                      <input type="text" autoComplete="name" {...fieldProps("name")} />
+                      <label htmlFor="contact-name">Votre nom</label>
+                      {errorFor("name")}
+                    </div>
+                    <div className="field">
+                      <input type="email" autoComplete="email" {...fieldProps("email")} />
+                      <label htmlFor="contact-email">Adresse e-mail</label>
+                      {errorFor("email")}
+                    </div>
+                  </div>
+                  <div className="field">
+                    <input type="text" {...fieldProps("subject")} />
+                    <label htmlFor="contact-subject">Objet (facultatif)</label>
+                  </div>
+                  <div className="field">
+                    <textarea rows={5} {...fieldProps("message")} />
+                    <label htmlFor="contact-message">Votre message</label>
+                    {errorFor("message")}
+                  </div>
+
+                  {status === "error" && (
+                    <p className="form-error" role="alert">
+                      Le message n'a pas pu être envoyé. Vérifiez votre connexion, puis réessayez.
+                    </p>
                   )}
-                </button>
-              </div>
-            )}
+
+                  <button className="btn btn-dark" type="submit" disabled={status === "loading"}>
+                    {status === "loading" ? (
+                      "Envoi en cours…"
+                    ) : (
+                      <>
+                        <span className="btn-roll">
+                          <span>Envoyer le message</span>
+                          <span aria-hidden="true">Envoyer le message</span>
+                        </span>
+                        <Send size={16} aria-hidden="true" />
+                      </>
+                    )}
+                  </button>
+                </motion.form>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
         <footer className="site-footer">
           <p>
-            © {new Date().getFullYear()} {profile?.name ?? "Portfolio"}.
-            Designed & built with ♥
+            © {new Date().getFullYear()} {profile?.name ?? "Portfolio"}
           </p>
           <div className="footer-links">
             {profile?.linkedin_url && (
               <a href={profile.linkedin_url} target="_blank" rel="noreferrer">
+                <LinkedInIcon size={16} />
                 LinkedIn
               </a>
             )}
             {profile?.github_url && (
               <a href={profile.github_url} target="_blank" rel="noreferrer">
+                <GitHubIcon size={16} />
                 GitHub
               </a>
             )}

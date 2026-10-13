@@ -1,4 +1,4 @@
-// Types pour le Portfolio
+// Types pour le Portfolio (miroir des ressources de l'API)
 
 export interface Profile {
   id?: number;

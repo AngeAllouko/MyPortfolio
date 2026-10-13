@@ -1,102 +1,81 @@
 .skills {
-  padding: 120px 0;
-  border-top: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-3);
 }
 
-.skills .section-header {
-  text-align: center;
-  margin-bottom: 64px;
+.skills-inner {
+  position: relative;
+  z-index: 2;
 }
 
-.skills-grid {
+.skills-chip {
+  top: -10px;
+  right: calc(var(--gutter) + 40px);
+}
+
+@media (max-width: 900px) {
+  .skills-chip {
+    display: none;
+  }
+}
+
+.skill-groups {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-}
-
-.skill-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 28px 24px;
-  transition: var(--transition);
-}
-
-.skill-card:hover {
-  border-color: var(--border-light);
-  transform: translateY(-3px);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: clamp(40px, 6vw, 72px);
 }
 
 .skill-category {
-  font-family: var(--font-display);
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--line);
+  font-size: var(--step-1);
+  font-weight: 700;
+  font-stretch: 85%;
 }
 
-/* ── Barres de progression ── */
-.skill-bars {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+.skill-list {
+  list-style: none;
+  display: grid;
+  gap: 22px;
 }
 
-.skill-bar-item {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.skill-bar-top {
+.skill-top {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: baseline;
+  margin-bottom: 10px;
 }
 
-.skill-bar-name {
-  font-size: 0.82rem;
-  color: var(--text-secondary);
-  font-weight: 400;
+.skill-name {
+  font-weight: 500;
 }
 
-.skill-bar-pct {
-  font-size: 0.75rem;
-  color: var(--accent);
-  font-weight: 600;
-  font-family: var(--font-display);
+.skill-pct {
+  color: var(--muted);
+  font-size: var(--step--1);
+  font-variant-numeric: tabular-nums;
 }
 
-.skill-bar-track {
-  height: 4px;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 100px;
+/* Jauge en 10 cases qui s'allument une à une */
+.skill-cells {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 4px;
+}
+
+.skill-cell {
+  position: relative;
+  height: 10px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--text) 10%, transparent);
   overflow: hidden;
 }
 
-.skill-bar-fill {
-  height: 100%;
-  background: var(--accent);
-  border-radius: 100px;
-  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Hover — la barre s'illumine */
-.skill-card:hover .skill-bar-fill {
-  box-shadow: 0 0 8px var(--accent-glow, rgba(232,255,71,0.4));
-}
-
-.skill-card:hover .skill-bar-name {
-  color: var(--text-primary);
-}
-
-@media (max-width: 1024px) {
-  .skills-grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 600px) {
-  .skills-grid { grid-template-columns: 1fr; }
-  .skills { padding: 80px 0; }
+.skill-cell-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--yellow);
+  transform-origin: 50% 100%;
 }

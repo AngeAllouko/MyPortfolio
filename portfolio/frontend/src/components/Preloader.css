@@ -1,0 +1,41 @@
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: grid;
+  place-items: center;
+  background: var(--yellow);
+  color: var(--on-yellow);
+}
+
+.preloader-inner {
+  display: grid;
+  gap: 18px;
+  width: min(80vw, 520px);
+}
+
+.preloader-name {
+  font-size: clamp(3.5rem, 14vw, 9rem);
+  font-weight: 800;
+  font-stretch: 75%;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+}
+
+/* Les signes aléatoires restent sombres sur fond jaune */
+.preloader .scramble-glyph {
+  color: inherit;
+  opacity: 0.45;
+}
+
+.preloader-bar {
+  height: 3px;
+  background: color-mix(in srgb, var(--on-yellow) 20%, transparent);
+}
+
+.preloader-bar span {
+  display: block;
+  height: 100%;
+  background: var(--on-yellow);
+  transform-origin: 0 50%;
+}

@@ -1,0 +1,327 @@
+/* ==========================================================
+   Scène et boîte 3D génériques
+   ========================================================== */
+
+.float3d {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  perspective: 900px;
+}
+
+.float3d-tilt,
+.float3d-bob {
+  transform-style: preserve-3d;
+}
+
+.float3d-bob {
+  animation: bob 6s ease-in-out infinite;
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+
+.box3d {
+  position: relative;
+  width: var(--w);
+  height: var(--h);
+  transform-style: preserve-3d;
+}
+
+.face {
+  position: absolute;
+  display: grid;
+  place-items: center;
+}
+
+.face-front { inset: 0; transform: translateZ(calc(var(--d) / 2)); }
+.face-back { inset: 0; transform: rotateY(180deg) translateZ(calc(var(--d) / 2)); }
+
+.face-right,
+.face-left {
+  top: 0;
+  width: var(--d);
+  height: var(--h);
+  left: calc((var(--w) - var(--d)) / 2);
+}
+.face-right { transform: rotateY(90deg) translateZ(calc(var(--w) / 2)); }
+.face-left { transform: rotateY(-90deg) translateZ(calc(var(--w) / 2)); }
+
+.face-top,
+.face-bottom {
+  left: 0;
+  width: var(--w);
+  height: var(--d);
+  top: calc((var(--h) - var(--d)) / 2);
+}
+.face-top { transform: rotateX(90deg) translateZ(calc(var(--h) / 2)); }
+.face-bottom { transform: rotateX(-90deg) translateZ(calc(var(--h) / 2)); }
+
+/* ==========================================================
+   Cube de code — chaque face a sa propre lumière
+   ========================================================== */
+
+.spin-cube {
+  transform-style: preserve-3d;
+  animation: cube-spin 22s linear infinite;
+}
+
+@keyframes cube-spin {
+  from { transform: rotateX(-22deg) rotateY(0deg); }
+  to { transform: rotateX(-22deg) rotateY(360deg); }
+}
+
+.code-cube .face {
+  color: var(--on-yellow);
+  font-size: calc(var(--w) * 0.3);
+  font-weight: 800;
+  font-stretch: 75%;
+  border: 1px solid color-mix(in srgb, var(--on-yellow) 25%, transparent);
+  border-radius: 10px;
+}
+.code-cube .face-front { background: #ffdb00; }
+.code-cube .face-right { background: #e6c500; }
+.code-cube .face-back { background: #c9ad00; }
+.code-cube .face-left { background: #ebca00; }
+.code-cube .face-top { background: #ffe94d; }
+.code-cube .face-bottom { background: #a88f00; }
+
+/* ==========================================================
+   Touche de clavier
+   ========================================================== */
+
+.keycap-tilt {
+  transform-style: preserve-3d;
+  transform: rotateX(52deg) rotateZ(-32deg);
+}
+
+.keycap {
+  pointer-events: auto;
+  transition: transform 0.25s var(--ease-out);
+}
+
+/* Elle s'enfonce quand on la survole */
+.keycap:hover {
+  transform: translateZ(-14px);
+}
+
+.keycap .face {
+  border-radius: 10px;
+}
+
+.keycap-dark .face-front {
+  background: linear-gradient(145deg, #4a4a4a, #383838);
+  box-shadow: inset 0 0 0 6px rgba(0, 0, 0, 0.18);
+}
+.keycap-dark .face-right,
+.keycap-dark .face-left { background: #262626; }
+.keycap-dark .face-top { background: #2e2e2e; }
+.keycap-dark .face-bottom,
+.keycap-dark .face-back { background: #1d1d1d; }
+.keycap-dark .keycap-label { color: var(--yellow); }
+
+.keycap-light .face-front {
+  background: linear-gradient(145deg, #4a4a4a, #323232);
+  box-shadow: inset 0 0 0 6px rgba(0, 0, 0, 0.2);
+}
+.keycap-light .face-right,
+.keycap-light .face-left { background: #1f1f1f; }
+.keycap-light .face-top { background: #2a2a2a; }
+.keycap-light .face-bottom,
+.keycap-light .face-back { background: #161616; }
+.keycap-light .keycap-label { color: var(--yellow); }
+
+.keycap-label {
+  font-size: 1.35rem;
+  font-weight: 700;
+  font-stretch: 85%;
+  /* les lettres semblent imprimées sur la touche */
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* ==========================================================
+   Processeur
+   ========================================================== */
+
+.chip-tilt {
+  transform-style: preserve-3d;
+  animation: chip-turn 26s linear infinite;
+}
+
+@keyframes chip-turn {
+  from { transform: rotateX(58deg) rotateZ(0deg); }
+  to { transform: rotateX(58deg) rotateZ(360deg); }
+}
+
+.chip .face-front {
+  background: #262626;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+/* Les broches : des bandes jaunes régulières sur chaque tranche */
+.chip .face-right,
+.chip .face-left,
+.chip .face-top,
+.chip .face-bottom {
+  background-color: #1b1b1b;
+  background-image: repeating-linear-gradient(
+    var(--pins-dir, 90deg),
+    var(--yellow) 0 7px,
+    transparent 7px 16px
+  );
+}
+.chip .face-right,
+.chip .face-left {
+  --pins-dir: 0deg;
+}
+.chip .face-back { background: #161616; }
+
+.chip-die {
+  display: grid;
+  place-items: center;
+  width: 62%;
+  aspect-ratio: 1;
+  border: 2px solid var(--yellow);
+  border-radius: 6px;
+  background:
+    linear-gradient(rgba(255, 219, 0, 0.12) 1px, transparent 1px) 0 0 / 10px 10px,
+    linear-gradient(90deg, rgba(255, 219, 0, 0.12) 1px, transparent 1px) 0 0 / 10px 10px;
+  color: var(--yellow);
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+/* ==========================================================
+   Accolades extrudées
+   ========================================================== */
+
+.braces {
+  position: relative;
+  transform-style: preserve-3d;
+  animation: braces-sway 9s ease-in-out infinite;
+  font-size: clamp(5rem, 8vw, 7.5rem);
+  font-weight: 800;
+  font-stretch: 75%;
+  line-height: 1;
+}
+
+@keyframes braces-sway {
+  0%, 100% { transform: rotateY(-28deg) rotateX(10deg); }
+  50% { transform: rotateY(28deg) rotateX(-6deg); }
+}
+
+.braces-layer {
+  display: block;
+  white-space: nowrap;
+  color: rgb(
+    calc(255 * var(--shade))
+    calc(219 * var(--shade))
+    0
+  );
+}
+
+.braces-layer + .braces-layer {
+  position: absolute;
+  inset: 0;
+}
+
+/* ==========================================================
+   Terminal
+   ========================================================== */
+
+.terminal-tilt {
+  transform-style: preserve-3d;
+  transform: rotateY(-24deg) rotateX(12deg) rotateZ(2deg);
+}
+
+.terminal .face-front {
+  border-radius: 12px;
+  background: #1e1e1e;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.terminal .face-right,
+.terminal .face-left,
+.terminal .face-top,
+.terminal .face-bottom { background: #111; }
+.terminal .face-back { background: #0c0c0c; border-radius: 12px; }
+
+.terminal-screen {
+  width: 100%;
+  height: 100%;
+  padding: 14px 18px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.terminal-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.terminal-bar i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #555;
+}
+.terminal-bar i:first-child {
+  background: var(--yellow);
+}
+
+.terminal-line {
+  display: flex;
+  gap: 10px;
+}
+
+.terminal-prompt {
+  color: var(--yellow);
+}
+
+/* La commande se tape lettre par lettre, puis recommence */
+.terminal-typed {
+  overflow: hidden;
+  white-space: nowrap;
+  width: calc(var(--chars) * 1ch);
+  border-right: 2px solid var(--yellow);
+  animation:
+    typing 5s steps(var(--chars)) infinite,
+    caret 0.8s step-end infinite;
+}
+
+@keyframes typing {
+  0% { width: 0; }
+  40%, 85% { width: calc(var(--chars) * 1ch); }
+  100% { width: 0; }
+}
+
+@keyframes caret {
+  50% { border-color: transparent; }
+}
+
+.terminal-out {
+  color: #9be29b;
+  animation: out 5s steps(1) infinite;
+}
+
+@keyframes out {
+  0%, 44% { opacity: 0; }
+  45%, 85% { opacity: 1; }
+  86%, 100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .terminal-typed {
+    width: calc(var(--chars) * 1ch) !important;
+  }
+  .terminal-out {
+    opacity: 1 !important;
+  }
+}

@@ -1,64 +1,97 @@
-import { useEffect, useState } from "react";
-import api from "../api/axios";
+import { motion, useReducedMotion } from "motion/react";
+import SectionTitle from "../components/SectionTitle";
+import ScrambleText from "../components/motion/ScrambleText";
+import BlobScene from "../components/bg/BlobScene";
+import Float3D from "../components/three-d/Float3D";
+import { Chip } from "../components/three-d/Objects3D";
+import { PALETTE } from "../lib/palette";
+import { usePortfolio } from "../data/context";
 import "./Skills.css";
 
-interface Skill {
-  id: number;
-  name: string;
-  category: string;
-  level: number;
-}
+const CELLS = 10;
 
 export default function Skills() {
-  const [skills, setSkills] = useState<Skill[]>([]);
-
-  useEffect(() => {
-    api
-      .get("/skills")
-      .then((r) => setSkills(r.data))
-      .catch(() => {});
-  }, []);
-
-  const grouped = skills.reduce<Record<string, Skill[]>>((acc, s) => {
-    if (!acc[s.category]) acc[s.category] = [];
-    acc[s.category].push(s);
-    return acc;
-  }, {});
+  const { skillGroups, status } = usePortfolio();
+  const reduce = useReducedMotion();
 
   return (
-    <section id="skills" className="skills">
-      <div className="container">
-        <div className="section-header">
-          <span className="section-tag">Qu'est ce que je connais</span>
-          <h2 className="section-title">Skills</h2>
-          <p className="section-subtitle">
-            Création de design attrayant et de code propre
+    <section id="skills" className="section skills has-bg">
+      {/* Blob ton sur ton, à peine plus clair que le fond de la section */}
+      <BlobScene
+        blobs={[{ corner: "top-right", radius: 260, color: PALETTE.soft, fade: PALETTE.bg3, steps: 2, seed: 27 }]}
+      />
+      <div className="container skills-inner">
+        <Float3D className="skills-chip" depth={0.9}>
+          <Chip />
+        </Float3D>
+        <header className="section-head">
+          <SectionTitle>Compétences</SectionTitle>
+          <p className="section-lead">
+            Des interfaces soignées et un code propre, du premier croquis à la mise en ligne.
           </p>
-        </div>
+        </header>
 
-        <div className="skills-grid">
-          {Object.entries(grouped).map(([category, items]) => (
-            <div className="skill-card" key={category}>
-              <h3 className="skill-category">{category}</h3>
-              <div className="skill-bars">
-                {items.map((s) => (
-                  <div className="skill-bar-item" key={s.id}>
-                    <div className="skill-bar-top">
-                      <span className="skill-bar-name">{s.name}</span>
-                      <span className="skill-bar-pct">{s.level}%</span>
-                    </div>
-                    <div className="skill-bar-track">
-                      <div
-                        className="skill-bar-fill"
-                        style={{ width: `${s.level}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
+        {skillGroups.length > 0 ? (
+          <div className="skill-groups">
+            {skillGroups.map(([category, items]) => (
+              <div className="skill-group" key={category}>
+                <h3 className="skill-category">{category}</h3>
+                <ul className="skill-list">
+                  {items.map((s) => {
+                    const level = Math.max(0, Math.min(100, Number(s.level) || 0));
+                    // Chaque case vaut 10 % ; la dernière peut être partielle
+                    const lit = level / (100 / CELLS);
+                    return (
+                      <motion.li
+                        className="skill"
+                        key={s.id ?? s.name}
+                        initial="off"
+                        whileInView="on"
+                        viewport={{ once: true, margin: "0px 0px -10% 0px" }}
+                      >
+                        <div className="skill-top">
+                          <span className="skill-name">{s.name}</span>
+                          <ScrambleText className="skill-pct" text={`${level} %`} duration={700} />
+                        </div>
+                        <div
+                          className="skill-cells"
+                          role="meter"
+                          aria-label={s.name}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-valuenow={level}
+                        >
+                          {Array.from({ length: CELLS }, (_, c) => {
+                            const fill = Math.max(0, Math.min(1, lit - c));
+                            return (
+                              <span className="skill-cell" key={c}>
+                                {fill > 0 && (
+                                  <motion.span
+                                    className="skill-cell-fill"
+                                    style={{ width: `${fill * 100}%` }}
+                                    variants={{
+                                      off: { scaleY: reduce ? 1 : 0 },
+                                      on: {
+                                        scaleY: 1,
+                                        transition: { delay: c * 0.06, duration: 0.3, ease: "backOut" },
+                                      },
+                                    }}
+                                  />
+                                )}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </motion.li>
+                    );
+                  })}
+                </ul>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          status !== "loading" && <p className="empty-note">Les compétences seront bientôt ajoutées.</p>
+        )}
       </div>
     </section>
   );

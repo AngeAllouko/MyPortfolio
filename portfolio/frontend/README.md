@@ -1,73 +1,60 @@
-# React + TypeScript + Vite
+# Portfolio — frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React 19 + TypeScript + Vite, animé avec [Motion](https://motion.dev) et [Lenis](https://lenis.darkroom.engineering) (défilement fluide).
 
-Currently, two official plugins are available:
+## Lancer le projet
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev        # avec l'API Laravel (VITE_API_URL, par défaut http://localhost:8000/api)
+npm run dev:demo   # sans backend, avec des données de démonstration
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Variables d'environnement inchangées : `VITE_API_URL` et `VITE_STORAGE_URL`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Ce qui a changé dans la refonte
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+**Données** — un seul `PortfolioProvider` (`src/data`) charge `/profile`, `/skills`, `/projects`,
+`/experiences` et `/diplomas` une fois pour tout le site (avant : `/profile` était appelé 4 fois).
+Il accepte les réponses en tableau, en objet ou en `{ data: [...] }`, et `technologies` en tableau,
+JSON ou texte séparé par des virgules.
+
+**Identité** — bleu nuit `#0E1A2E` et jaune vif `#FFDB00`, définis dans `src/index.css`
+(un commentaire indique les valeurs pour revenir aux couleurs d'origine). Police : Bricolage
+Grotesque variable, auto-hébergée via `@fontsource-variable`.
+
+**Motion design** (`src/components/motion` et `src/components`)
+
+| Élément | Animation |
+| --- | --- |
+| Ouverture (`Preloader`) | Écran jaune, le nom se décode, puis le panneau remonte (une fois par visite) |
+| Titre du hero (`ScrambleText`) | Les lettres défilent en signes aléatoires puis se fixent |
+| Titres, portrait, parcours, images de projets (`BlockReveal`) | Un volet jaune traverse et dévoile le contenu |
+| Portrait | Le portrait et son contour suivent la souris en sens opposés |
+| Bandeaux croisés (`Marquee`) | Deux bandes inclinées défilent en sens contraires |
+| Services (`Tilt`) | Cartes distribuées en éventail, inclinées vers la souris avec un reflet jaune |
+| Compétences | Jauges en 10 cases qui s'allument une à une |
+| Chiffres clés | Se décodent comme le titre |
+| Projets | Section épinglée : le défilement fait glisser les projets à l'horizontale, les cartes penchent selon la vitesse |
+| Curseur (`Cursor`) | Pastille jaune qui suit la souris et grossit sur les liens |
+| Navigation | Les liens se décodent au survol, soulignement jaune qui glisse |
+| Menu mobile | Le fond tombe en 4 colonnes décalées |
+| Boutons | Le libellé roule au survol |
+| Formulaire | Étiquettes flottantes, validation par champ, coche dessinée à l'envoi |
+
+**Arrière-plans** (`src/components/bg`) — formes générées en SVG dans l'esprit de Haikei :
+`BlobScene` pose des blobs en couches dans les coins des sections (ils ondulent lentement) et
+`LayeredWaves` fait la transition en vagues entre deux sections. Les couleurs viennent de
+`src/lib/palette.ts`.
+
+**Objets 3D** (`src/components/three-d`, en CSS 3D, sans WebGL) — cube de code qui tourne
+et touche « Ctrl » dans l'accueil, accolades en relief, terminal qui tape `npm run dev`
+(Services), processeur (Compétences), touche « Entrée » qui s'enfonce au survol (Contact).
+Ils flottent et pivotent vers la souris ; plusieurs sont masqués sur mobile.
+
+**Accessibilité** — `prefers-reduced-motion` respecté partout (Motion, Lenis, CSS), lien
+« Aller au contenu », focus visible, textes animés lisibles par les lecteurs d'écran,
+compétences exposées en `role="meter"`, erreurs de formulaire reliées aux champs.
+
+`src/assets/hero.png`, `react.svg` et `vite.svg` (logos du gabarit Vite) ne sont plus utilisés.
